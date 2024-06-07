@@ -1,5 +1,5 @@
 import AgoraRTC, { AudienceLatencyLevelType, IAgoraRTCRemoteUser, ICameraVideoTrack, ILocalAudioTrack, ILocalDataChannel, ILocalVideoTrack, IMicrophoneAudioTrack } from 'agora-rtc-sdk-ng';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import AgoraManager from '../utils/Agora';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';

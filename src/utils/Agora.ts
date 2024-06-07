@@ -1,4 +1,4 @@
-import AgoraRTC, { ClientConfig, IAgoraRTCClient, SDK_MODE } from "agora-rtc-sdk-ng";
+import AgoraRTC, { IAgoraRTCClient, SDK_MODE } from "agora-rtc-sdk-ng";
 
 class AgoraManager {
     client : IAgoraRTCClient;
