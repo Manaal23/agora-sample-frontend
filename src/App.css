@@ -1,0 +1,8 @@
+.participants-parent {
+  display: flex;
+}
+
+.screen-share-main{
+  width: 50em;
+  height: 25em;
+}
