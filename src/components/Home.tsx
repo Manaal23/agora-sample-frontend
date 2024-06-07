@@ -7,6 +7,7 @@ import AgoraRTC, {
 } from "agora-rtc-sdk-ng";
 import { useEffect, useState } from "react";
 import AgoraManager from "../utils/Agora";
+import { useNavigate } from "react-router-dom";
 
 // const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" }); //rtc client
 // const screenClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
@@ -27,6 +28,7 @@ function Home() {
   const [audioStatus, setAudioStatus] = useState(true);
   const [videoStatus, setVideoStatus] = useState(true);
   const [screenShare, setScreenShare] = useState(false);
+  const navigate = useNavigate();
 
   client.on("user-published", async (user, mediaType) => {
     console.log(user, "***************azazazaz");
@@ -170,6 +172,7 @@ function Home() {
           }}
         ></div>
       ) : null}
+      <button onClick={() => navigate("/live-streaming")}>go to live-streaming</button>
     </>
   );
 }
