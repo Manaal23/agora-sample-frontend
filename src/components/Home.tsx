@@ -5,7 +5,7 @@ import AgoraRTC, {
   ILocalVideoTrack,
   IMicrophoneAudioTrack,
 } from "agora-rtc-sdk-ng";
-import { useEffect, useState } from "react";
+import { EffectCallback, useEffect, useState } from "react";
 import AgoraManager from "../utils/Agora";
 import { useNavigate } from "react-router-dom";
 
@@ -30,6 +30,9 @@ function Home() {
   const [screenShare, setScreenShare] = useState(false);
   const navigate = useNavigate();
 
+  useEffect((() => {
+    return () => client.leave() 
+  }) as unknown as EffectCallback,[])
   client.on("user-published", async (user, mediaType) => {
     console.log(user, "***************azazazaz");
     await client.subscribe(user, mediaType);

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import AgoraManager from '../utils/Agora';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import RecordingLabel from './RecordingLabel/RecordingLabel';
 
 
 const client = AgoraRTC.createClient({
@@ -31,6 +32,7 @@ function LiveStreaming() {
   const [userId, setUserId] = useState<number | null>(null);
   const [isRecord, setIsRecord] = useState(false);
   const [recordData, setRecordData] = useState<{sid: string | null, resourceId: string | null}>({sid: null, resourceId:null});
+  const [isRecorder, setIsRecorder] = useState(false);
   const router = useLocation();
   
   client.on("user-published", async (user, mediaType) => {
@@ -56,8 +58,10 @@ function LiveStreaming() {
           Authorization: `Bearer ${router.search.slice(1)}` 
         }
       }).then(async res => {
-        if (res.data.success)
+        if (res.data.success){
+          setIsRecorder(true)
           joinAsHost()
+        }
       }).catch(err => console.log(err, "/verify/rec-auth"))
     }
   },[])
@@ -66,17 +70,20 @@ function LiveStreaming() {
   const agoraInit = async () => {
     // JOIN CHANNEL
     await client.join(VITE_AGORA_APP_ID, "newchannel", token, null);
-    setUserId(client.uid as number)
+    if (!isRecorder){
 
-    const [localAudioTrack, localVideoTrack] =
-      await AgoraRTC.createMicrophoneAndCameraTracks();
-
-    setLocalVideoTrack(localVideoTrack);
-    setVideoStatus(localVideoTrack.enabled);
-    setLocalAudioTrack(localAudioTrack);
-    setAudioStatus(localAudioTrack.enabled);
-
-    client.publish([localAudioTrack, localVideoTrack]);
+      setUserId(client.uid as number)
+  
+      const [localAudioTrack, localVideoTrack] =
+        await AgoraRTC.createMicrophoneAndCameraTracks();
+  
+      setLocalVideoTrack(localVideoTrack);
+      setVideoStatus(localVideoTrack.enabled);
+      setLocalAudioTrack(localAudioTrack);
+      setAudioStatus(localAudioTrack.enabled);
+  
+      client.publish([localAudioTrack, localVideoTrack]);
+    }
   };
 
   const toggleVideo = () => {
@@ -109,7 +116,7 @@ function LiveStreaming() {
       // screen.isScreenShared=true
       console.log(screen, "************Ererererere");
 
-      await screenClient.join(VITE_AGORA_APP_ID, "newchannel", token, null);
+      await screenClient.join(VITE_AGORA_APP_ID, "newchannel", token, 99999);
       screenClient.publish(screen);
       setScreenLocalStream(screen);
 
@@ -165,11 +172,13 @@ function LiveStreaming() {
       setIsRecord(!res.data.success)
     }
   }
+  const screenShareArr = remoteUsers.filter(elem => elem.uid === 99999) as IAgoraRTCRemoteUser[]
 
   return (
     <>
       <div>Live streaming</div>
-      {userId ? <>{client.role === "host" ? <><i
+      {isRecorder ? <RecordingLabel /> : null}
+      {userId && !isRecorder ? <>{client.role === "host" ? <><i
         className={`fa-solid fa-video${videoStatus ? "" : "-slash"}`}
         onClick={toggleVideo}
       ></i>
@@ -184,7 +193,7 @@ function LiveStreaming() {
       </> : null}
       {console.log(client.role,"****************roleeeeeeeeeeeeeeeeee", remoteUsers)}
       <div className="participants-parent">
-        {client.role === "host" ? <div
+        {client.role === "host" && !isRecorder ? <div
           id="local"
           style={{ width: "10em", height: "10em", background: "#000" }}
         >
@@ -200,7 +209,7 @@ function LiveStreaming() {
             ></div>
           )}
         </div> : null}
-        {remoteUsers.map((i) => {
+        {remoteUsers.filter(ele => ele.uid !== 99999).map((i) => {
           return (
             <div
               id={`${i.uid}`}
@@ -232,13 +241,26 @@ function LiveStreaming() {
         ></div>
       ) : null}</> : null}
       {
+        !screenShare && screenShareArr.length ?
+        <div
+        className="screen-share-main"
+        ref={(node) => {
+          if (node) {
+            screenShareArr[0]["videoTrack"]?.play(node as any);
+            screenShareArr[0]["audioTrack"]?.play();
+          }
+        }}
+      ></div>
+       : null
+      }
+      {
         !userId ? <><button onClick={joinAsHost}>join as host</button>
         <button onClick={joinAsAudience}>join as audience</button>
         </>
         : null
       }
       
-      {userId ? <button onClick={handleExit}>leave</button> : null}
+      {userId && !isRecorder ? <button onClick={handleExit}>leave</button> : null}
 
     </>
   );
