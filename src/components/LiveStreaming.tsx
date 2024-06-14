@@ -55,7 +55,10 @@ function LiveStreaming() {
         headers: {
           Authorization: `Bearer ${router.search.slice(1)}` 
         }
-      })
+      }).then(async res => {
+        if (res.data.success)
+          joinAsHost()
+      }).catch(err => console.log(err, "/verify/rec-auth"))
     }
   },[])
 
